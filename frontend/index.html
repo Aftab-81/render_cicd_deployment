@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gemini LLM App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Gemini LLM App</h1>
+        <div class="section">
+            <h2>Text Summarization</h2>
+            <textarea id="textInput" placeholder="Enter paragraph..."></textarea><br>
+            <button onclick="summarizeText()">Summary</button>
+            <div id="summaryOutput" class="output"></div>
+        </div>
+        <div class="section">
+            <h2>Image Explanation</h2>
+            <input type="file" id="imageInput" accept="image/*"><br>
+            <button onclick="explainImage()">Explain</button>
+            <div id="imageOutput" class="output"></div>
+        </div>
+        <div class="section">
+            <h2>Chatbot (QA)</h2>
+            <div class="chat-history" id="chatHistory"></div>
+            <textarea id="chatInput" placeholder="Ask a question..."></textarea><br>
+            <button onclick="sendChat()">Send</button>
+            <button onclick="endChat()">Quit</button>
+            <div id="chatOutput" class="output"></div>
+        </div>
+    </div>
+    <script>
+        // Relative path: works locally and on Render without any changes,
+        // since the frontend is served by the same FastAPI service as the API.
+        const backend = '/api';
+
+        function summarizeText() {
+            const text = document.getElementById('textInput').value;
+            const form = new FormData();
+            form.append('text', text);
+            fetch(backend + '/summarize', { method: 'POST', body: form })
+                .then(r => r.json())
+                .then(d => document.getElementById('summaryOutput').innerText = d.summary)
+                .catch(e => document.getElementById('summaryOutput').innerText = 'Error');
+        }
+
+        function explainImage() {
+            const file = document.getElementById('imageInput').files[0];
+            if (!file) return;
+            const form = new FormData();
+            form.append('file', file);
+            fetch(backend + '/explain-image', { method: 'POST', body: form })
+                .then(r => r.json())
+                .then(d => document.getElementById('imageOutput').innerText = d.explanation)
+                .catch(e => document.getElementById('imageOutput').innerText = 'Error');
+        }
+
+        let chatHistory = [];
+        function updateChatHistory() {
+            const historyDiv = document.getElementById('chatHistory');
+            historyDiv.innerHTML = chatHistory.map(item =>
+                `<div><span class="user-msg">You:</span> ${item.user}<br><span class="bot-msg">Bot:</span> ${item.bot}</div>`
+            ).join('');
+        }
+
+        function sendChat() {
+            const msg = document.getElementById('chatInput').value;
+            if (!msg.trim()) return;
+            const form = new FormData();
+            form.append('message', msg);
+            fetch(backend + '/chat', { method: 'POST', body: form })
+                .then(r => r.json())
+                .then(d => {
+                    chatHistory.push({ user: msg, bot: d.response });
+                    updateChatHistory();
+                    document.getElementById('chatInput').value = '';
+                    document.getElementById('chatOutput').innerText = d.response;
+                })
+                .catch(e => document.getElementById('chatOutput').innerText = 'Error');
+        }
+
+        function endChat() {
+            const form = new FormData();
+            form.append('message', 'quit');
+            fetch(backend + '/chat', { method: 'POST', body: form })
+                .then(r => r.json())
+                .then(d => {
+                    chatHistory.push({ user: 'quit', bot: d.response });
+                    updateChatHistory();
+                    document.getElementById('chatOutput').innerText = d.response;
+                })
+                .catch(e => document.getElementById('chatOutput').innerText = 'Error');
+        }
+    </script>
+</body>
+</html>
