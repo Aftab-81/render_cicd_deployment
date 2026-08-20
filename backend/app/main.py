@@ -75,10 +75,15 @@ def chat(message: str = Form(...)):
     return JSONResponse({"response": extract_text(data)})
 
 
+# Checking CICD Pipe
+
+@app.get("/status")
+def check_pipeline():
+    return {"message": "CICD Pipeline is working Fine on it"}
+
+
 # Serve the static frontend (index.html, style.css) from the same service.
 # Declared last so it acts as a fallback and doesn't shadow the /api routes above.
 _frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
 if _frontend_dir.exists():
     app.mount("/", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
-
-# Checking CICD Pipeline
