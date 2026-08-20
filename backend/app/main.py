@@ -82,6 +82,13 @@ def check_pipeline():
     return {"message": "CICD Pipeline is working Fine on it"}
 
 
+# Checking CICD Pipe
+
+@app.get("/check")
+def check_pipeline():
+    return {"message": "Hello!! How are you?"}
+
+
 # Serve the static frontend (index.html, style.css) from the same service.
 # Declared last so it acts as a fallback and doesn't shadow the /api routes above.
 _frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
