@@ -30,6 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render deploy
-        run: curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+        run: curl -f "${{ secrets.RENDER_DEPLOY_HOOK }}"
 
         # Check 2nd time
