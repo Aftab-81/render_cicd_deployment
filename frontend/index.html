@@ -2,95 +2,1416 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gemini LLM App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gemini AI Workspace</title>
+
+    <!-- Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="container">
-        <h1>Gemini LLM App</h1>
-        <div class="section">
-            <h2>Text Summarization</h2>
-            <textarea id="textInput" placeholder="Enter paragraph..."></textarea><br>
-            <button onclick="summarizeText()">Summary</button>
-            <div id="summaryOutput" class="output"></div>
+
+<div class="app">
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+
+            <div>
+                <h2>Gemini AI</h2>
+                <span>AI Workspace</span>
+            </div>
         </div>
-        <div class="section">
-            <h2>Image Explanation</h2>
-            <input type="file" id="imageInput" accept="image/*"><br>
-            <button onclick="explainImage()">Explain</button>
-            <div id="imageOutput" class="output"></div>
+
+
+        <nav class="nav">
+
+            <button class="nav-item active"
+                    onclick="showSection('summary', this)">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Summarization</span>
+            </button>
+
+
+            <button class="nav-item"
+                    onclick="showSection('image', this)">
+                <i class="fa-regular fa-image"></i>
+                <span>Image Analysis</span>
+            </button>
+
+
+            <button class="nav-item"
+                    onclick="showSection('chat', this)">
+                <i class="fa-regular fa-comments"></i>
+                <span>AI Chat</span>
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="status">
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>Gemini API</strong>
+                    <small>Connected</small>
+                </div>
+            </div>
+
         </div>
-        <div class="section">
-            <h2>Chatbot (QA)</h2>
-            <div class="chat-history" id="chatHistory"></div>
-            <textarea id="chatInput" placeholder="Ask a question..."></textarea><br>
-            <button onclick="sendChat()">Send</button>
-            <button onclick="endChat()">Quit</button>
-            <div id="chatOutput" class="output"></div>
-        </div>
-    </div>
-    <script>
-        // Relative path: works locally and on Render without any changes,
-        // since the frontend is served by the same FastAPI service as the API.
-        const backend = '/api';
 
-        function summarizeText() {
-            const text = document.getElementById('textInput').value;
+    </aside>
+
+
+    <!-- =========================
+         MAIN AREA
+    ========================== -->
+    <main class="main">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <div>
+                <p class="welcome">AI Workspace</p>
+                <h1 id="pageTitle">Text Summarization</h1>
+            </div>
+
+            <div class="top-actions">
+
+                <div class="ai-badge">
+                    <i class="fa-solid fa-sparkles"></i>
+                    Powered by Gemini
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             SUMMARY SECTION
+        ========================== -->
+        <section id="summary" class="tool-section active-section">
+
+            <div class="hero-card">
+
+                <div class="hero-icon purple">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+                <div>
+                    <h2>Smart Text Summarization</h2>
+                    <p>
+                        Transform long paragraphs and documents into
+                        concise AI-generated summaries.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="workspace-grid">
+
+                <!-- INPUT -->
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>
+                                <i class="fa-regular fa-pen-to-square"></i>
+                                Your Content
+                            </h3>
+
+                            <p>Paste the text you want Gemini to summarize.</p>
+                        </div>
+
+                        <span id="charCount">0 characters</span>
+
+                    </div>
+
+
+                    <textarea
+                        id="textInput"
+                        class="main-textarea"
+                        placeholder="Paste your paragraph, article or document here..."
+                        oninput="updateCharCount()"
+                    ></textarea>
+
+
+                    <div class="card-actions">
+
+                        <button
+                            class="secondary-btn"
+                            onclick="clearSummary()"
+                        >
+                            <i class="fa-solid fa-trash-can"></i>
+                            Clear
+                        </button>
+
+
+                        <button
+                            id="summaryBtn"
+                            class="primary-btn"
+                            onclick="summarizeText()"
+                        >
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            Generate Summary
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- OUTPUT -->
+                <div class="card output-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>
+                                <i class="fa-solid fa-sparkles"></i>
+                                AI Summary
+                            </h3>
+
+                            <p>Gemini's generated response will appear here.</p>
+                        </div>
+
+                        <button
+                            class="icon-btn"
+                            onclick="copyText('summaryOutput')"
+                            title="Copy"
+                        >
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="summaryOutput"
+                        class="output empty-output"
+                    >
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </div>
+
+                            <h3>Your summary will appear here</h3>
+
+                            <p>
+                                Enter text and click
+                                <strong>Generate Summary</strong>.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             IMAGE SECTION
+        ========================== -->
+        <section id="image" class="tool-section">
+
+            <div class="hero-card">
+
+                <div class="hero-icon blue">
+                    <i class="fa-regular fa-image"></i>
+                </div>
+
+                <div>
+                    <h2>AI Image Understanding</h2>
+
+                    <p>
+                        Upload an image and let Gemini analyze and
+                        explain its contents.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="workspace-grid">
+
+                <!-- IMAGE UPLOAD -->
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                Upload Image
+                            </h3>
+
+                            <p>PNG, JPG, JPEG and WebP supported.</p>
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="dropZone"
+                        class="drop-zone"
+                        onclick="document.getElementById('imageInput').click()"
+                    >
+
+                        <input
+                            type="file"
+                            id="imageInput"
+                            accept="image/*"
+                            hidden
+                            onchange="previewImage()"
+                        >
+
+
+                        <div id="uploadPlaceholder">
+
+                            <div class="upload-icon">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+
+                            <h3>Drop your image here</h3>
+
+                            <p>
+                                or
+                                <span>browse your computer</span>
+                            </p>
+
+                        </div>
+
+
+                        <img
+                            id="imagePreview"
+                            class="image-preview"
+                            alt="Preview"
+                        >
+
+                    </div>
+
+
+                    <div id="fileInfo" class="file-info"></div>
+
+
+                    <button
+                        id="imageBtn"
+                        class="primary-btn full-width"
+                        onclick="explainImage()"
+                    >
+
+                        <i class="fa-solid fa-eye"></i>
+                        Analyze Image
+
+                    </button>
+
+                </div>
+
+
+                <!-- IMAGE RESULT -->
+                <div class="card output-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <h3>
+                                <i class="fa-solid fa-brain"></i>
+                                AI Explanation
+                            </h3>
+
+                            <p>
+                                Gemini's interpretation of your image.
+                            </p>
+                        </div>
+
+
+                        <button
+                            class="icon-btn"
+                            onclick="copyText('imageOutput')"
+                        >
+
+                            <i class="fa-regular fa-copy"></i>
+
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="imageOutput"
+                        class="output empty-output"
+                    >
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                <i class="fa-regular fa-image"></i>
+                            </div>
+
+                            <h3>No image analyzed yet</h3>
+
+                            <p>
+                                Upload an image to start AI analysis.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CHAT SECTION
+        ========================== -->
+        <section id="chat" class="tool-section">
+
+            <div class="chat-container card">
+
+                <!-- Chat header -->
+                <div class="chat-header">
+
+                    <div class="bot-profile">
+
+                        <div class="bot-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+
+                        <div>
+                            <h3>Gemini Assistant</h3>
+
+                            <p>
+                                <span class="online-dot"></span>
+                                Online
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        class="secondary-btn"
+                        onclick="endChat()"
+                    >
+
+                        <i class="fa-solid fa-power-off"></i>
+                        End Chat
+
+                    </button>
+
+                </div>
+
+
+                <!-- Chat Messages -->
+                <div
+                    class="chat-history"
+                    id="chatHistory"
+                >
+
+                    <div class="message bot-message">
+
+                        <div class="message-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+
+                        <div class="message-content">
+
+                            <span>Gemini</span>
+
+                            <div class="bubble">
+                                👋 Hello! I'm your Gemini AI assistant.
+                                What can I help you with today?
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Suggestions -->
+                <div
+                    class="suggestions"
+                    id="suggestions"
+                >
+
+                    <button
+                        onclick="setQuestion('Explain Generative AI in simple words')"
+                    >
+                        ✨ Explain Generative AI
+                    </button>
+
+                    <button
+                        onclick="setQuestion('What is RAG in AI?')"
+                    >
+                        🧠 What is RAG?
+                    </button>
+
+                    <button
+                        onclick="setQuestion('Explain Agentic AI with an example')"
+                    >
+                        🤖 Explain Agentic AI
+                    </button>
+
+                </div>
+
+
+                <!-- Chat input -->
+                <div class="chat-input-wrapper">
+
+                    <textarea
+                        id="chatInput"
+                        placeholder="Ask Gemini anything..."
+                        rows="1"
+                    ></textarea>
+
+
+                    <button
+                        id="sendBtn"
+                        class="send-btn"
+                        onclick="sendChat()"
+                    >
+
+                        <i class="fa-solid fa-paper-plane"></i>
+
+                    </button>
+
+                </div>
+
+
+                <p class="disclaimer">
+                    Gemini may produce inaccurate information.
+                    Verify important responses.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================
+     TOAST
+========================== -->
+<div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>Copied successfully</span>
+</div>
+
+
+<script>
+
+    // =========================================================
+    // BACKEND
+    // =========================================================
+
+    const backend = "/api";
+
+
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
+    const titles = {
+        summary: "Text Summarization",
+        image: "Image Analysis",
+        chat: "AI Chat Assistant"
+    };
+
+
+    function showSection(sectionId, button) {
+
+        document
+            .querySelectorAll(".tool-section")
+            .forEach(section => {
+                section.classList.remove("active-section");
+            });
+
+
+        document
+            .getElementById(sectionId)
+            .classList.add("active-section");
+
+
+        document
+            .querySelectorAll(".nav-item")
+            .forEach(item => {
+                item.classList.remove("active");
+            });
+
+
+        button.classList.add("active");
+
+
+        document.getElementById("pageTitle").innerText =
+            titles[sectionId];
+
+    }
+
+
+    // =========================================================
+    // TEXT SUMMARIZATION
+    // =========================================================
+
+    function updateCharCount() {
+
+        const text =
+            document.getElementById("textInput").value;
+
+        document.getElementById("charCount").innerText =
+            `${text.length} characters`;
+
+    }
+
+
+    async function summarizeText() {
+
+        const text =
+            document.getElementById("textInput").value.trim();
+
+        const output =
+            document.getElementById("summaryOutput");
+
+        const button =
+            document.getElementById("summaryBtn");
+
+
+        if (!text) {
+
+            showError(
+                output,
+                "Please enter some text before generating a summary."
+            );
+
+            return;
+        }
+
+
+        button.disabled = true;
+
+        button.innerHTML =
+            `<i class="fa-solid fa-spinner fa-spin"></i>
+             Generating...`;
+
+
+        showLoader(
+            output,
+            "Gemini is analyzing your content..."
+        );
+
+
+        try {
+
             const form = new FormData();
-            form.append('text', text);
-            fetch(backend + '/summarize', { method: 'POST', body: form })
-                .then(r => r.json())
-                .then(d => document.getElementById('summaryOutput').innerText = d.summary)
-                .catch(e => document.getElementById('summaryOutput').innerText = 'Error');
+
+            form.append("text", text);
+
+
+            const response = await fetch(
+                backend + "/summarize",
+                {
+                    method: "POST",
+                    body: form
+                }
+            );
+
+
+            if (!response.ok) {
+                throw new Error("Server error");
+            }
+
+
+            const data = await response.json();
+
+
+            output.classList.remove("empty-output");
+
+            output.innerHTML = `
+                <div class="generated-content">
+                    ${formatResponse(data.summary)}
+                </div>
+            `;
+
         }
 
-        function explainImage() {
-            const file = document.getElementById('imageInput').files[0];
-            if (!file) return;
-            const form = new FormData();
-            form.append('file', file);
-            fetch(backend + '/explain-image', { method: 'POST', body: form })
-                .then(r => r.json())
-                .then(d => document.getElementById('imageOutput').innerText = d.explanation)
-                .catch(e => document.getElementById('imageOutput').innerText = 'Error');
+        catch (error) {
+
+            showError(
+                output,
+                "Unable to generate summary. Please try again."
+            );
+
         }
 
-        let chatHistory = [];
-        function updateChatHistory() {
-            const historyDiv = document.getElementById('chatHistory');
-            historyDiv.innerHTML = chatHistory.map(item =>
-                `<div><span class="user-msg">You:</span> ${item.user}<br><span class="bot-msg">Bot:</span> ${item.bot}</div>`
-            ).join('');
+        finally {
+
+            button.disabled = false;
+
+            button.innerHTML =
+                `<i class="fa-solid fa-wand-magic-sparkles"></i>
+                 Generate Summary`;
+
         }
 
-        function sendChat() {
-            const msg = document.getElementById('chatInput').value;
-            if (!msg.trim()) return;
-            const form = new FormData();
-            form.append('message', msg);
-            fetch(backend + '/chat', { method: 'POST', body: form })
-                .then(r => r.json())
-                .then(d => {
-                    chatHistory.push({ user: msg, bot: d.response });
-                    updateChatHistory();
-                    document.getElementById('chatInput').value = '';
-                    document.getElementById('chatOutput').innerText = d.response;
-                })
-                .catch(e => document.getElementById('chatOutput').innerText = 'Error');
+    }
+
+
+    function clearSummary() {
+
+        document.getElementById("textInput").value = "";
+
+        updateCharCount();
+
+
+        document.getElementById("summaryOutput").innerHTML = `
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+
+                <h3>Your summary will appear here</h3>
+
+                <p>
+                    Enter text and click
+                    <strong>Generate Summary</strong>.
+                </p>
+
+            </div>
+        `;
+
+    }
+
+
+    // =========================================================
+    // IMAGE ANALYSIS
+    // =========================================================
+
+    function previewImage() {
+
+        const input =
+            document.getElementById("imageInput");
+
+        const file =
+            input.files[0];
+
+
+        if (!file) return;
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload = function(event) {
+
+            const preview =
+                document.getElementById("imagePreview");
+
+            preview.src = event.target.result;
+
+            preview.style.display = "block";
+
+            document
+                .getElementById("uploadPlaceholder")
+                .style.display = "none";
+
+        };
+
+
+        reader.readAsDataURL(file);
+
+
+        document.getElementById("fileInfo").innerHTML = `
+
+            <i class="fa-regular fa-image"></i>
+
+            <div>
+                <strong>${escapeHtml(file.name)}</strong>
+                <span>${formatFileSize(file.size)}</span>
+            </div>
+
+        `;
+
+    }
+
+
+    async function explainImage() {
+
+        const file =
+            document.getElementById("imageInput").files[0];
+
+        const output =
+            document.getElementById("imageOutput");
+
+        const button =
+            document.getElementById("imageBtn");
+
+
+        if (!file) {
+
+            showError(
+                output,
+                "Please select an image first."
+            );
+
+            return;
         }
 
-        function endChat() {
-            const form = new FormData();
-            form.append('message', 'quit');
-            fetch(backend + '/chat', { method: 'POST', body: form })
-                .then(r => r.json())
-                .then(d => {
-                    chatHistory.push({ user: 'quit', bot: d.response });
-                    updateChatHistory();
-                    document.getElementById('chatOutput').innerText = d.response;
-                })
-                .catch(e => document.getElementById('chatOutput').innerText = 'Error');
+
+        button.disabled = true;
+
+        button.innerHTML =
+            `<i class="fa-solid fa-spinner fa-spin"></i>
+             Analyzing...`;
+
+
+        showLoader(
+            output,
+            "Gemini is understanding your image..."
+        );
+
+
+        try {
+
+            const form =
+                new FormData();
+
+            form.append("file", file);
+
+
+            const response =
+                await fetch(
+                    backend + "/explain-image",
+                    {
+                        method: "POST",
+                        body: form
+                    }
+                );
+
+
+            if (!response.ok) {
+                throw new Error("Server error");
+            }
+
+
+            const data =
+                await response.json();
+
+
+            output.classList.remove("empty-output");
+
+            output.innerHTML = `
+
+                <div class="generated-content">
+                    ${formatResponse(data.explanation)}
+                </div>
+
+            `;
+
         }
-    </script>
+
+        catch (error) {
+
+            showError(
+                output,
+                "Unable to analyze image. Please try again."
+            );
+
+        }
+
+        finally {
+
+            button.disabled = false;
+
+            button.innerHTML =
+                `<i class="fa-solid fa-eye"></i>
+                 Analyze Image`;
+
+        }
+
+    }
+
+
+    // Drag & Drop
+
+    const dropZone =
+        document.getElementById("dropZone");
+
+
+    dropZone.addEventListener(
+        "dragover",
+        function(event) {
+
+            event.preventDefault();
+
+            dropZone.classList.add("drag-over");
+
+        }
+    );
+
+
+    dropZone.addEventListener(
+        "dragleave",
+        function() {
+
+            dropZone.classList.remove("drag-over");
+
+        }
+    );
+
+
+    dropZone.addEventListener(
+        "drop",
+        function(event) {
+
+            event.preventDefault();
+
+            dropZone.classList.remove("drag-over");
+
+
+            const files =
+                event.dataTransfer.files;
+
+
+            if (
+                files.length > 0 &&
+                files[0].type.startsWith("image/")
+            ) {
+
+                const input =
+                    document.getElementById("imageInput");
+
+
+                const dataTransfer =
+                    new DataTransfer();
+
+
+                dataTransfer.items.add(files[0]);
+
+                input.files =
+                    dataTransfer.files;
+
+
+                previewImage();
+
+            }
+
+        }
+    );
+
+
+    // =========================================================
+    // CHAT
+    // =========================================================
+
+    let chatHistory = [];
+
+
+    function updateChatHistory() {
+
+        const historyDiv =
+            document.getElementById("chatHistory");
+
+
+        let html = `
+
+            <div class="message bot-message">
+
+                <div class="message-avatar">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+
+                <div class="message-content">
+
+                    <span>Gemini</span>
+
+                    <div class="bubble">
+                        👋 Hello! I'm your Gemini AI assistant.
+                        What can I help you with today?
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        chatHistory.forEach(item => {
+
+            html += `
+
+                <div class="message user-message">
+
+                    <div class="message-content">
+
+                        <span>You</span>
+
+                        <div class="bubble">
+                            ${escapeHtml(item.user)}
+                        </div>
+
+                    </div>
+
+                    <div class="message-avatar user-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="message bot-message">
+
+                    <div class="message-avatar">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+
+                    <div class="message-content">
+
+                        <span>Gemini</span>
+
+                        <div class="bubble">
+                            ${formatResponse(item.bot)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        });
+
+
+        historyDiv.innerHTML = html;
+
+
+        historyDiv.scrollTo({
+            top: historyDiv.scrollHeight,
+            behavior: "smooth"
+        });
+
+    }
+
+
+    async function sendChat() {
+
+        const input =
+            document.getElementById("chatInput");
+
+        const button =
+            document.getElementById("sendBtn");
+
+        const msg =
+            input.value.trim();
+
+
+        if (!msg) return;
+
+
+        input.value = "";
+
+        autoResizeChatInput();
+
+
+        document
+            .getElementById("suggestions")
+            .style.display = "none";
+
+
+        // Immediately show user message
+
+        const historyDiv =
+            document.getElementById("chatHistory");
+
+
+        historyDiv.innerHTML += `
+
+            <div class="message user-message">
+
+                <div class="message-content">
+
+                    <span>You</span>
+
+                    <div class="bubble">
+                        ${escapeHtml(msg)}
+                    </div>
+
+                </div>
+
+                <div class="message-avatar user-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+
+            </div>
+
+
+            <div
+                class="message bot-message"
+                id="typingIndicator"
+            >
+
+                <div class="message-avatar">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+
+                <div class="message-content">
+
+                    <span>Gemini</span>
+
+                    <div class="bubble typing">
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        historyDiv.scrollTop =
+            historyDiv.scrollHeight;
+
+
+        button.disabled = true;
+
+
+        try {
+
+            const form =
+                new FormData();
+
+            form.append("message", msg);
+
+
+            const response =
+                await fetch(
+                    backend + "/chat",
+                    {
+                        method: "POST",
+                        body: form
+                    }
+                );
+
+
+            if (!response.ok) {
+                throw new Error("Server error");
+            }
+
+
+            const data =
+                await response.json();
+
+
+            document
+                .getElementById("typingIndicator")
+                ?.remove();
+
+
+            chatHistory.push({
+                user: msg,
+                bot: data.response
+            });
+
+
+            updateChatHistory();
+
+        }
+
+        catch (error) {
+
+            document
+                .getElementById("typingIndicator")
+                ?.remove();
+
+
+            chatHistory.push({
+                user: msg,
+                bot: "Sorry, I couldn't process your request. Please try again."
+            });
+
+
+            updateChatHistory();
+
+        }
+
+        finally {
+
+            button.disabled = false;
+
+        }
+
+    }
+
+
+    async function endChat() {
+
+        const form =
+            new FormData();
+
+        form.append("message", "quit");
+
+
+        try {
+
+            const response =
+                await fetch(
+                    backend + "/chat",
+                    {
+                        method: "POST",
+                        body: form
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            chatHistory.push({
+                user: "End conversation",
+                bot: data.response
+            });
+
+
+            updateChatHistory();
+
+        }
+
+        catch {
+
+            showToast("Unable to end chat");
+
+        }
+
+    }
+
+
+    function setQuestion(question) {
+
+        const input =
+            document.getElementById("chatInput");
+
+        input.value = question;
+
+        input.focus();
+
+    }
+
+
+    // Press Enter to send
+
+    document
+        .getElementById("chatInput")
+        .addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendChat();
+
+                }
+
+            }
+        );
+
+
+    // =========================================================
+    // HELPERS
+    // =========================================================
+
+    function showLoader(element, message) {
+
+        element.classList.remove("empty-output");
+
+        element.innerHTML = `
+
+            <div class="loader-state">
+
+                <div class="ai-loader">
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </div>
+
+                <h3>${message}</h3>
+
+                <p>This may take a moment.</p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    function showError(element, message) {
+
+        element.classList.remove("empty-output");
+
+        element.innerHTML = `
+
+            <div class="error-state">
+
+                <i class="fa-solid fa-circle-exclamation"></i>
+
+                <h3>Something went wrong</h3>
+
+                <p>${message}</p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    function copyText(elementId) {
+
+        const text =
+            document
+                .getElementById(elementId)
+                .innerText;
+
+
+        navigator.clipboard
+            .writeText(text)
+            .then(() => {
+
+                showToast("Copied to clipboard");
+
+            });
+
+    }
+
+
+    function showToast(message) {
+
+        const toast =
+            document.getElementById("toast");
+
+
+        toast.querySelector("span").innerText =
+            message;
+
+
+        toast.classList.add("show");
+
+
+        setTimeout(() => {
+
+            toast.classList.remove("show");
+
+        }, 2500);
+
+    }
+
+
+    function formatFileSize(bytes) {
+
+        if (bytes < 1024)
+            return `${bytes} B`;
+
+        if (bytes < 1024 * 1024)
+            return `${(bytes / 1024).toFixed(1)} KB`;
+
+        return `${(
+            bytes /
+            (1024 * 1024)
+        ).toFixed(1)} MB`;
+
+    }
+
+
+    function escapeHtml(text) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent =
+            text ?? "";
+
+        return div.innerHTML;
+
+    }
+
+
+    function formatResponse(text) {
+
+        return escapeHtml(text ?? "")
+            .replace(/\n/g, "<br>");
+
+    }
+
+
+    function autoResizeChatInput() {
+
+        const input =
+            document.getElementById("chatInput");
+
+        input.style.height =
+            "auto";
+
+        input.style.height =
+            Math.min(input.scrollHeight, 130) + "px";
+
+    }
+
+
+    document
+        .getElementById("chatInput")
+        .addEventListener(
+            "input",
+            autoResizeChatInput
+        );
+
+</script>
+
 </body>
 </html>
