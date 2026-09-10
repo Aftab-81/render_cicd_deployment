@@ -88,6 +88,7 @@ def check_pipeline():
 def check_pipeline():
     return {"message": "Hello!! How are you?"}
 
+# Check code
 
 # Serve the static frontend (index.html, style.css) from the same service.
 # Declared last so it acts as a fallback and doesn't shadow the /api routes above.
